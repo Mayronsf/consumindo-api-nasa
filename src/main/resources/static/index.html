@@ -32,7 +32,7 @@
     <script>
         async function fetchData() {
             try {
-                const response = await fetch('/api/nasa/data');
+                const response = await fetch('/api/v1/nasa/data');
                 if (!response.ok) {
                     throw new Error('Erro ao buscar dados da NASA');
                 }

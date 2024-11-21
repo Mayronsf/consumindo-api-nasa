@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/nasa")
+@RequestMapping("/api/v1/nasa")
 public class NasaController {
 
     @Autowired
@@ -75,4 +75,3 @@ public class NasaController {
         return ResponseEntity.ok(response);
     }
 }
-
