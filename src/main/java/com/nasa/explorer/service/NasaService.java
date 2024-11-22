@@ -1,5 +1,8 @@
 package com.nasa.explorer.service;
 
+import com.nasa.explorer.dto.NasaDataResponseDTO;
+import com.nasa.explorer.model.NasaDataResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,64 +12,61 @@ import java.util.List;
 @Service
 public class NasaService {
 
-    private static final String API_KEY = "03zBobyI30mtzlcMH5ykhnyQ9n5fAlyxZdes7Ko7";  
+    private static final String API_KEY = "03zBobyI30mtzlcMH5ykhnyQ9n5fAlyxZdes7Ko7";
     private static final String NASA_API_URL = "https://api.nasa.gov/planetary/apod?api_key=" + API_KEY;
 
-    // Lista para armazenar dados da NASA
-    private List<String> nasaData = new ArrayList<>();
+    private final RestTemplate restTemplate;
+    private List<NasaDataResponse> nasaData = new ArrayList<>();
 
-    public String getNasaData() {
-        RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    public NasaService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public NasaDataResponseDTO getNasaData() {
         try {
-            String data = restTemplate.getForObject(NASA_API_URL, String.class);
-            // Adiciona o dado à lista
-            nasaData.add(data); // Armazena o dado retornado
-            return data;
+            NasaDataResponse data = restTemplate.getForObject(NASA_API_URL, NasaDataResponse.class);
+            if (data != null) {
+                nasaData.add(data); // Armazenar o dado para uso futuro
+                return convertToDTO(data);
+            }
         } catch (Exception e) {
-            return "Erro ao buscar dados da NASA: " + e.getMessage();
+            // Log do erro (você pode usar um logger aqui)
+            e.printStackTrace();
         }
+        return null; // Retorna null em caso de erro
     }
 
-    public String getNasaDataById(String id) {
-        // Lógica para obter dados por ID
-        return nasaData.stream().filter(data -> data.equals(id)).findFirst().orElse("Dados não encontrados");
-    }
-
-    public List<String> getAllNasaData() {
-        // Retorna todos os dados armazenados
-        return nasaData;
-    }
-
-    public String addNasaData(String newData) {
-        // Adiciona novos dados à lista
-        nasaData.add(newData);
-        return "Dados adicionados com sucesso";
-    }
-
-    public String updateNasaData(String id, String updatedData) {
-        for (int i = 0; i < nasaData.size(); i++) {
-            if (nasaData.get(i).equals(id)) {
-                nasaData.set(i, updatedData);
-                return "Dados atualizados com sucesso";
+    public NasaDataResponseDTO getNasaDataByDate(String date) {
+        // Primeiro, verifica se os dados estão armazenados localmente
+        NasaDataResponseDTO foundData = nasaData.stream()
+                .filter(data -> data.getDate().equals(date))
+                .map(this::convertToDTO)
+                .findFirst()
+                .orElse(null);
+        
+        // Se não encontrado, tenta buscar na API
+        if (foundData == null) {
+            String apiUrlByDate = "https://api.nasa.gov/planetary/apod?api_key=" + API_KEY + "&date=" + date;
+            try {
+                NasaDataResponse data = restTemplate.getForObject(apiUrlByDate, NasaDataResponse.class);
+                if (data != null) {
+                    return convertToDTO(data);
+                }
+            } catch (Exception e) {
+                // Log do erro
+                e.printStackTrace();
             }
         }
-        return "Dados não encontrados";
+        return foundData; // Retorna o dado encontrado ou null
     }
 
-    public String patchNasaData(String id, String partialData) {
-        for (int i = 0; i < nasaData.size(); i++) {
-            if (nasaData.get(i).equals(id)) {
-                // Exemplo de atualização parcial: adiciona os dados parciais ao existente
-                nasaData.set(i, nasaData.get(i) + " " + partialData);
-                return "Dados atualizados parcialmente com sucesso";
-            }
-        }
-        return "Dados não encontrados";
-    }
-
-    public String deleteNasaData(String id) {
-        // Lógica para deletar dados por ID
-        boolean removed = nasaData.removeIf(data -> data.equals(id));
-        return removed ? "Dados deletados com sucesso" : "Dados não encontrados";
+    private NasaDataResponseDTO convertToDTO(NasaDataResponse response) {
+        NasaDataResponseDTO dto = new NasaDataResponseDTO();
+        dto.setDate(response.getDate());
+        dto.setTitle(response.getTitle());
+        dto.setExplanation(response.getExplanation());
+        dto.setUrl(response.getUrl());
+        return dto;
     }
 }
