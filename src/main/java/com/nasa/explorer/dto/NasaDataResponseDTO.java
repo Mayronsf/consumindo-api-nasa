@@ -8,7 +8,7 @@ public class NasaDataResponseDTO {
     private String explanation;
     private String url;
 
-    // Construtor que aceita um NasaDataResponse
+    
     public NasaDataResponseDTO(NasaDataResponse response) {
         this.date = response.getDate();
         this.title = response.getTitle();

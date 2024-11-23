@@ -34,7 +34,7 @@ public class NasaController {
         return ResponseEntity.ok(data);
     }
 
-    @GetMapping("/data/date")
+    @GetMapping("/data/{date}")
     @Operation(
         summary = "Buscar dados por data específica",
         description = "Retorna os dados da NASA para a data especificada. Utilize o formato YYYY-MM-DD.",
@@ -44,8 +44,8 @@ public class NasaController {
         }
     )
     public ResponseEntity<NasaDataResponseDTO> getDataByDate(
-            @Parameter(description = "Data no formato YYYY-MM-DD", required = true) 
-            @RequestParam String date) {
+            @Parameter(description = "Data no formato YYYY-MM-DD", required = true)
+            @RequestParam(name = "date")String date) {
         NasaDataResponseDTO data = nasaService.getNasaDataByDate(date);
         if (data == null) {
             return ResponseEntity.notFound().build();

@@ -27,25 +27,25 @@ public class NasaService {
         try {
             NasaDataResponse data = restTemplate.getForObject(NASA_API_URL, NasaDataResponse.class);
             if (data != null) {
-                nasaData.add(data); // Armazenar o dado para uso futuro
+                nasaData.add(data); 
                 return convertToDTO(data);
             }
         } catch (Exception e) {
-            // Log do erro (você pode usar um logger aqui)
+            
             e.printStackTrace();
         }
-        return null; // Retorna null em caso de erro
+        return null; 
     }
 
     public NasaDataResponseDTO getNasaDataByDate(String date) {
-        // Primeiro, verifica se os dados estão armazenados localmente
+        
         NasaDataResponseDTO foundData = nasaData.stream()
                 .filter(data -> data.getDate().equals(date))
                 .map(this::convertToDTO)
                 .findFirst()
                 .orElse(null);
         
-        // Se não encontrado, tenta buscar na API
+        
         if (foundData == null) {
             String apiUrlByDate = "https://api.nasa.gov/planetary/apod?api_key=" + API_KEY + "&date=" + date;
             try {
@@ -58,7 +58,7 @@ public class NasaService {
                 e.printStackTrace();
             }
         }
-        return foundData; // Retorna o dado encontrado ou null
+        return foundData; 
     }
 
     private NasaDataResponseDTO convertToDTO(NasaDataResponse response) {
