@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class NasaService {
+public class NasaService extends AbstractNasaService {
 
     private static final String API_KEY = "03zBobyI30mtzlcMH5ykhnyQ9n5fAlyxZdes7Ko7";
     private static final String NASA_API_URL = "https://api.nasa.gov/planetary/apod?api_key=" + API_KEY;
@@ -23,29 +23,28 @@ public class NasaService {
         this.restTemplate = restTemplate;
     }
 
+    @Override
     public NasaDataResponseDTO getNasaData() {
         try {
             NasaDataResponse data = restTemplate.getForObject(NASA_API_URL, NasaDataResponse.class);
             if (data != null) {
-                nasaData.add(data); 
+                nasaData.add(data);
                 return convertToDTO(data);
             }
         } catch (Exception e) {
-            
             e.printStackTrace();
         }
-        return null; 
+        return null;
     }
 
+    @Override
     public NasaDataResponseDTO getNasaDataByDate(String date) {
-        
         NasaDataResponseDTO foundData = nasaData.stream()
                 .filter(data -> data.getDate().equals(date))
                 .map(this::convertToDTO)
                 .findFirst()
                 .orElse(null);
-        
-        
+
         if (foundData == null) {
             String apiUrlByDate = "https://api.nasa.gov/planetary/apod?api_key=" + API_KEY + "&date=" + date;
             try {
@@ -54,11 +53,10 @@ public class NasaService {
                     return convertToDTO(data);
                 }
             } catch (Exception e) {
-                // Log do erro
                 e.printStackTrace();
             }
         }
-        return foundData; 
+        return foundData;
     }
 
     private NasaDataResponseDTO convertToDTO(NasaDataResponse response) {

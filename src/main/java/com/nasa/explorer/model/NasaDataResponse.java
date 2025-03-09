@@ -8,7 +8,6 @@ public class NasaDataResponse {
     private String explanation;
     private String url;
 
-    // Getters e Setters
 
     @JsonProperty("date")
     public String getDate() {
